@@ -2,7 +2,6 @@ require(rJava)
 require(RWeka)
 require(partykit)
 require(class)
-require(randomForest)
 
 trainData <- read.csv("trainset.csv")
 testData <- read.csv("testset.csv")
@@ -58,39 +57,3 @@ summary(testingData)
 
 knnpred <- knn(train=trainingData, test=testingData, cl=trainData.target, k =109)
 table (knnpred, testData.target)
-
-
-#Random Forest Tree
-
-trainIndex2 <- which(trainData$Subscribed == 'yes')
-deleteIndex2 <- sample(trainIndex2, length(trainIndex2) - 3)
-trainData.subset2 <- trainData[-deleteIndex2, ]
-summary(trainData.subset2)
-
-newTrain2 <- trainData.subset2
-newTrain2$Subscribed <- as.factor(newTrain2$Subscribed)
-testData$Subscribed <- as.factor(testData$Subscribed)
-summary(newTrain2)
-
-normalize <- function(x) { return ((x - min(x)) / (max(x) - min(x)))}
-trainingData2 <- newTrain2[c( 'nr.employed', 'age' , 'job', 'contact'  , 'Subscribed')]
-trainingData2$nr.employed <- as.numeric(trainingData2$nr.employed)
-trainingData2$nr.employed <- normalize(trainingData2$nr.employed)
-trainingData2$age <- normalize(trainingData2$age)
-summary(trainingData2)
-
-testingData2 <- testData[c('nr.employed', 'age', 'job', 'contact' , 'Subscribed')]
-testingData2$nr.employed <- as.numeric(testingData2$nr.employed)
-testingData2$nr.employed <- normalize(testingData2$nr.employed)
-testingData2$age <- normalize(testingData2$age)
-summary(testingData2)
-
-rf <- randomForest(
-  Subscribed ~ . ,
-  data = trainingData2 ,
-  ntree = 600,
-  mincriterion = 0.78,
-  maxdepth = 70)
-pred = predict(rf, newdata=testingData2[-5])
-table (pred, testingData2$Subscribed)
-
